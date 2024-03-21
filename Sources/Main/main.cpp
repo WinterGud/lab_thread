@@ -2,9 +2,13 @@
 #include <thread>
 #include <fstream>
 #include <vector>
+#include <map>
 #include <chrono>
+#include <mutex>
+
+std::mutex mutex;
  
-void scrapFile(std::string path, std::vector<int>& numWordsList)
+void scrapFile(std::string path, std::map<std::string, int>& wordsMap)
 {
     std::ifstream is(path);
     if(!is)
@@ -13,34 +17,65 @@ void scrapFile(std::string path, std::vector<int>& numWordsList)
     }
     else
     {
-        int num = 0;
         while (is)
         {
             std::string temp;
             is >> temp;
-            ++num;
+            mutex.lock();
+            if (wordsMap.find(temp) == wordsMap.end())
+            {
+                wordsMap.emplace(temp, 1);
+            }
+            else
+            {
+                wordsMap.at(temp) += 1;
+            }
+            mutex.unlock();
         }
-        numWordsList.push_back(num);
     }
 }
 
 int main() 
 {
     using namespace std::chrono;
+
+    std::vector<std::string> paths =
+        {
+        "..\\..\\Solution\\Main\\data\\file1.txt",
+        "..\\..\\Solution\\Main\\data\\file2.txt",
+        "..\\..\\Solution\\Main\\data\\file3.txt",
+        "..\\..\\Solution\\Main\\data\\file4.txt",
+        "..\\..\\Solution\\Main\\data\\file5.txt",
+        "..\\..\\Solution\\Main\\data\\file6.txt"
+        };
+
+    const int threadsNum = 2;
+    std::vector<std::thread> threads(threadsNum);
     steady_clock::time_point timeStart = steady_clock::now();
-    
-    std::vector<int> numWordsList;
-    std::thread thread1 (scrapFile, "..\\..\\Solution\\Main\\data\\file1.txt", std::ref(numWordsList));
-    std::thread thread2 (scrapFile, "..\\..\\Solution\\Main\\data\\file2.txt", std::ref(numWordsList));
+    std::map<std::string, int> wordsMap;
+
+    for (int j = 0; j < paths.size() / threadsNum; j++)
+    {
+        for (int i = 0; i < threadsNum; i++)
+        {
+            threads[i] = std::thread(scrapFile, paths[i + j], std::ref(wordsMap));
+        }
  
-    thread1.join();                
-    thread2.join();
-    
+        for (int i = 0; i < threadsNum; i++)
+        {
+            threads[i].join();
+        }
+    }
     steady_clock::time_point timeEnd = steady_clock::now();
     duration<double> time_span = duration_cast<duration<double>>(timeEnd - timeStart);
-    std::cout << time_span.count() << " seconds.\n";
+    for (auto it = wordsMap.begin(); it != wordsMap.end(); it++)
+    {
+        std::cout << it->first << ' ' << it->second << '\n';
+    }
+
+    std::cout << time_span.count();
     
-    std::cout << numWordsList[0] << ' ' << numWordsList[1];
+    
     
     return 0;
 }
