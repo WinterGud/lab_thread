@@ -46,10 +46,16 @@ int main()
         "..\\..\\Solution\\Main\\data\\file3.txt",
         "..\\..\\Solution\\Main\\data\\file4.txt",
         "..\\..\\Solution\\Main\\data\\file5.txt",
-        "..\\..\\Solution\\Main\\data\\file6.txt"
+        "..\\..\\Solution\\Main\\data\\file6.txt",
+        "..\\..\\Solution\\Main\\data\\file7.txt",
+        "..\\..\\Solution\\Main\\data\\file8.txt",
+        "..\\..\\Solution\\Main\\data\\file9.txt",
+        "..\\..\\Solution\\Main\\data\\file10.txt",
+        "..\\..\\Solution\\Main\\data\\file11.txt",
+        "..\\..\\Solution\\Main\\data\\file12.txt"
         };
 
-    const int threadsNum = 2;
+    const int threadsNum = 6;
     std::vector<std::thread> threads(threadsNum);
     steady_clock::time_point timeStart = steady_clock::now();
     std::map<std::string, int> wordsMap;
