@@ -54,16 +54,16 @@ int main()
     steady_clock::time_point timeStart = steady_clock::now();
     std::map<std::string, int> wordsMap;
 
-    for (int j = 0; j < paths.size() / threadsNum; j++)
+    for (int i = 0; i < paths.size() / threadsNum; i++)
     {
-        for (int i = 0; i < threadsNum; i++)
+        for (int j = 0; j < threadsNum; j++)
         {
-            threads[i] = std::thread(scrapFile, paths[i + j], std::ref(wordsMap));
+            threads[j] = std::thread(scrapFile, paths[i + j], std::ref(wordsMap));
         }
  
-        for (int i = 0; i < threadsNum; i++)
+        for (int j = 0; j < threadsNum; j++)
         {
-            threads[i].join();
+            threads[j].join();
         }
     }
     steady_clock::time_point timeEnd = steady_clock::now();
