@@ -25,7 +25,7 @@ void thread_pool::run()
     using namespace std::chrono;
     const steady_clock::time_point timeStart = steady_clock::now();
 
-    m_funcToScrap("..\\..\\/Sources\\Files\file1 – копія (2).txt", m_wordsMap);
+    m_funcToScrap("..\\..\\Sources\\Files\file1 – копія (2).txt", m_wordsMap);
     
     // auto it = m_fileNames.begin();
     //
