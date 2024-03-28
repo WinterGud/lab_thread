@@ -11,7 +11,7 @@ namespace
 
 thread_pool::thread_pool(int numThreads, std::string folderPath)
     : m_threads(numThreads)
-    , m_funcToScrap(std::bind(&thread_pool::scrapFile, this, folderPath, m_wordsMap))
+    , m_funcToScrap(std::bind(&thread_pool::scrapFile, this, std::placeholders::_1, std::ref(m_wordsMap)))
 {
     parseFileNames(folderPath);
 }
@@ -24,47 +24,45 @@ void thread_pool::run()
 {
     using namespace std::chrono;
     const steady_clock::time_point timeStart = steady_clock::now();
-
-    m_funcToScrap("..\\..\\Sources\\Files\file1 – копія (2).txt", m_wordsMap);
     
-    // auto it = m_fileNames.begin();
-    //
-    // for (int i = 0; i < m_threads.size(); ++i)
-    // {
-    //     m_threads[i] = std::thread(m_funcToScrap, *it, std::ref(m_wordsMap));
-    //     it = std::next(it);
-    // }
-    //
-    // while (it != m_fileNames.end())
-    // {
-    //     for (auto& m_thread : m_threads)
-    //     {
-    //         if (m_thread.joinable())
-    //         {
-    //             m_thread.join();
-    //             if (it == m_fileNames.end())
-    //             {
-    //                 break;
-    //             }
-    //             m_thread = std::thread(m_funcToScrap, *(it), std::ref(m_wordsMap));
-    //             it = std::next(it);
-    //         }
-    //     }
-    // }
-    //
-    // for (auto& m_thread : m_threads)
-    // {
-    //     if (m_thread.joinable())
-    //     {
-    //         m_thread.join();
-    //     }
-    // }
+    auto it = m_fileNames.begin();
+    
+    for (int i = 0; i < m_threads.size(); ++i)
+    {
+        m_threads[i] = std::thread(m_funcToScrap, *it, std::ref(m_wordsMap));
+        it = std::next(it);
+    }
+    
+    while (it != m_fileNames.end())
+    {
+        for (auto& m_thread : m_threads)
+        {
+            if (m_thread.joinable())
+            {
+                m_thread.join();
+                if (it == m_fileNames.end())
+                {
+                    break;
+                }
+                m_thread = std::thread(m_funcToScrap, *(it), std::ref(m_wordsMap));
+                it = std::next(it);
+            }
+        }
+    }
+    
+    for (auto& m_thread : m_threads)
+    {
+        if (m_thread.joinable())
+        {
+            m_thread.join();
+        }
+    }
     
     const steady_clock::time_point timeEnd = steady_clock::now();
     const duration<double> time_span = duration_cast<duration<double>>(timeEnd - timeStart);
-    for (auto& it : m_wordsMap)
+    for (auto& it2 : m_wordsMap)
     {
-        std::cout << it.first << ' ' << it.second << '\n';
+        std::cout << it2.first << ' ' << it2.second << '\n';
     }
 
     std::cout << time_span.count();
